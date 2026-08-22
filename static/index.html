@@ -1,0 +1,2163 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerConnect AI — Next-Gen Autonomous Placement & GraphRAG Platform</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b',
+            },
+            dark: {
+              base: '#080B11',
+              card: 'rgba(15, 23, 42, 0.7)',
+              border: 'rgba(255, 255, 255, 0.08)',
+              accent: '#6366f1'
+            }
+          },
+          animation: {
+            'float-slow': 'float 6s ease-in-out infinite',
+            'float-delayed': 'float 7s ease-in-out 2s infinite',
+            'pulse-glow': 'pulseGlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'border-shimmer': 'borderShimmer 4s linear infinite',
+            'gradient-x': 'gradientX 15s ease infinite',
+            'spin-slow': 'spin 20s linear infinite',
+            'radar-sweep': 'radarSweep 4s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-14px) rotate(1deg)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+              '50%': { opacity: '0.9', transform: 'scale(1.08)' },
+            },
+            gradientX: {
+              '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+              '50%': { 'background-size': '200% 200%', 'background-position': 'right center' },
+            },
+            radarSweep: {
+              '0%': { transform: 'rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Font: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <!-- Axios CDN -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #06090e;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+    .font-mono-tech {
+      font-family: 'Space Grotesk', monospace;
+    }
+    [v-cloak] { display: none; }
+
+    /* Custom futuristic glow scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #06090e; }
+    ::-webkit-scrollbar-thumb { background: #312e81; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+    /* Glassmorphism Classes */
+    .glass-card {
+      background: rgba(13, 19, 33, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card-hover {
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-5px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 20px 40px -15px rgba(79, 70, 229, 0.25);
+    }
+
+    /* Ambient Background Glows */
+    .ambient-glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glow Text */
+    .text-glow-indigo {
+      text-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+    }
+    .text-glow-emerald {
+      text-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+    }
+    .text-glow-purple {
+      text-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+    }
+
+    /* Holographic card border */
+    .hologram-border {
+      position: relative;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.1), 0 0 25px rgba(99, 102, 241, 0.15);
+    }
+  </style>
+</head>
+<body class="h-full bg-[#06090e] text-slate-100 flex flex-col selection:bg-brand-500 selection:text-white relative">
+  <div id="app" v-cloak class="min-h-full flex flex-col relative z-10">
+
+    <!-- Interactive Background Particle Canvas -->
+    <canvas id="neuralCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+    <!-- Ambient Lighting Blobs -->
+    <div class="ambient-glow w-[500px] h-[500px] bg-brand-600/20 top-[-100px] left-[-100px]"></div>
+    <div class="ambient-glow w-[600px] h-[600px] bg-purple-600/15 top-[20%] right-[-150px]"></div>
+    <div class="ambient-glow w-[400px] h-[400px] bg-pink-600/10 bottom-[10%] left-[20%]"></div>
+
+    <!-- ============================================================ -->
+    <!-- NAVBAR (ULTRA-MODERN GLASS) -->
+    <!-- ============================================================ -->
+    <header class="sticky top-0 z-50 bg-[#080c14]/80 backdrop-blur-2xl border-b border-white/10 transition-all">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+          
+          <!-- Logo -->
+          <div @click="switchTab('landing')" class="flex items-center gap-3 cursor-pointer group">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative">
+              <i data-lucide="sparkles" class="w-6 h-6 text-white animate-spin-slow"></i>
+              <div class="absolute inset-0 rounded-2xl bg-white/20 blur-xs group-hover:blur-md transition-all"></div>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-white via-indigo-200 to-purple-300 bg-clip-text text-transparent">
+                  CareerConnect
+                </span>
+                <span class="text-[10px] font-black uppercase tracking-widest text-indigo-400 px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/30 rounded-full">
+                  AI
+                </span>
+              </div>
+              <p class="text-[10px] font-mono-tech text-slate-400 tracking-wider">Dual GraphRAG Engine</p>
+            </div>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <nav class="hidden md:flex items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl" v-if="token">
+            <template v-if="role === 'STUDENT'">
+              <button @click="switchTab('student_dashboard')" :class="navTabClass('student_dashboard')">
+                <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 mr-1.5"></i> Dashboard
+              </button>
+              <button @click="switchTab('student_drives')" :class="navTabClass('student_drives')">
+                <i data-lucide="briefcase" class="w-3.5 h-3.5 mr-1.5"></i> Explore Drives
+              </button>
+              <button @click="switchTab('student_applications')" :class="navTabClass('student_applications')">
+                <i data-lucide="file-check-2" class="w-3.5 h-3.5 mr-1.5"></i> Applications
+              </button>
+              <button @click="switchTab('student_resume')" :class="navTabClass('student_resume')">
+                <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1.5"></i> Resume Studio
+              </button>
+              <button @click="switchTab('student_chat')" :class="navTabClass('student_chat')" class="text-purple-400 bg-purple-500/10 border border-purple-500/20">
+                <i data-lucide="bot" class="w-3.5 h-3.5 mr-1.5 text-purple-400"></i> AI Agent
+              </button>
+            </template>
+
+            <template v-if="role === 'RECRUITER'">
+              <button @click="switchTab('recruiter_dashboard')" :class="navTabClass('recruiter_dashboard')">
+                <i data-lucide="building-2" class="w-3.5 h-3.5 mr-1.5"></i> Recruiter Hub
+              </button>
+              <button @click="switchTab('recruiter_manage_drives')" :class="navTabClass('recruiter_manage_drives')">
+                <i data-lucide="layers" class="w-3.5 h-3.5 mr-1.5"></i> Manage Drives
+              </button>
+              <button @click="switchTab('recruiter_post_drive')" class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 rounded-xl shadow-lg shadow-brand-500/30 transition-all flex items-center gap-1.5">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Post Drive
+              </button>
+            </template>
+          </nav>
+
+          <!-- Right side controls -->
+          <div class="flex items-center gap-3">
+            <!-- Audio Sound FX Toggle -->
+            <button @click="toggleSound" class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 hover:text-white transition-all" :title="soundEnabled ? 'Mute Sound FX' : 'Enable Sound FX'">
+              <i :data-lucide="soundEnabled ? 'volume-2' : 'volume-x'" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Backend Status Pulse -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono-tech">
+              <span :class="backendConnected ? 'bg-emerald-400 shadow-[0_0_12px_#34d399]' : 'bg-amber-400 animate-ping'" class="w-2 h-2 rounded-full"></span>
+              <span class="text-slate-300">{{ backendConnected ? 'ONLINE' : 'CONNECTING' }}</span>
+            </div>
+
+            <!-- Profile dropdown or Auth Buttons -->
+            <div v-if="token" class="flex items-center gap-2">
+              <button @click="openProfileTab" :class="activeTab === 'student_profile' || activeTab === 'recruiter_profile' ? 'ring-2 ring-brand-400 shadow-lg shadow-brand-500/30' : ''" class="flex items-center gap-2.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 to-indigo-500 text-white font-bold flex items-center justify-center text-xs shadow-md">
+                  {{ (user.full_name || user.name || 'U').charAt(0) }}
+                </div>
+                <div class="text-left hidden sm:block">
+                  <p class="text-xs font-bold text-white leading-tight">{{ user.full_name || user.name }}</p>
+                  <p class="text-[9px] font-mono-tech text-indigo-400 uppercase tracking-widest">{{ role }}</p>
+                </div>
+              </button>
+              <button @click="logout" class="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl transition-all" title="Sign Out">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div v-else class="flex items-center gap-2">
+              <button @click="openAuth('login', 'student')" class="px-4 py-2 text-xs font-bold text-slate-300 hover:text-white transition-colors">
+                Sign In
+              </button>
+              <button @click="openAuth('register', 'student')" class="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 rounded-xl shadow-lg shadow-brand-500/30 transition-all transform hover:-translate-y-0.5">
+                Get Started
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTAINER -->
+    <!-- ============================================================ -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 relative z-10">
+
+      <!-- ============================================================ -->
+      <!-- 1. CINEMATIC HERO & LANDING PAGE -->
+      <!-- ============================================================ -->
+      <section v-if="activeTab === 'landing'" class="space-y-16 py-6">
+        
+        <div class="relative text-center py-12 sm:py-20 space-y-8">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-brand-500/15 via-purple-500/15 to-pink-500/15 border border-brand-500/30 text-indigo-300 text-xs font-mono-tech tracking-wider uppercase backdrop-blur-xl animate-pulse-glow shadow-[0_0_20px_rgba(99,102,241,0.2)]">
+            <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-400"></i>
+            Deterministic Policies • Neo4j GraphRAG • Zero-Hallucination
+          </div>
+
+          <h1 class="text-4xl sm:text-7xl font-extrabold tracking-tight max-w-5xl mx-auto leading-[1.1] text-white">
+            Autonomous Placement & <br class="hidden sm:block"/>
+            <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent text-glow-indigo">
+              Knowledge Graph Intelligence
+            </span>
+          </h1>
+
+          <p class="text-slate-400 text-base sm:text-xl max-w-3xl mx-auto leading-relaxed font-normal">
+            Eliminate placement ambiguity with strict rule-based deterministic eligibility, automated resume NLP skill extraction, and multi-hop graph neural recommendations.
+          </p>
+
+          <div class="flex flex-wrap justify-center items-center gap-4 pt-4">
+            <button @click="openAuth('register', 'student')" class="px-8 py-4 bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold text-sm rounded-2xl shadow-xl shadow-brand-500/30 flex items-center gap-3 transition-all transform hover:-translate-y-1 hover:scale-105 active:scale-95">
+              <i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-200"></i>
+              <span>Launch Student Portal</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+
+            <button @click="openAuth('register', 'recruiter')" class="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/15 text-white font-bold text-sm rounded-2xl backdrop-blur-xl flex items-center gap-3 transition-all transform hover:-translate-y-1">
+              <i data-lucide="building-2" class="w-5 h-5 text-purple-400"></i>
+              <span>Recruiter Command Hub</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto pt-12 text-left">
+            <div class="glass-card p-6 rounded-3xl relative overflow-hidden group hover:border-brand-500/40 transition-all">
+              <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-brand-500/10 rounded-full blur-xl group-hover:bg-brand-500/20 transition-all"></div>
+              <p class="text-3xl font-black font-mono-tech text-white">100%</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-indigo-400 mt-1">Deterministic Accuracy</p>
+              <p class="text-[11px] text-slate-500 mt-0.5">Strict non-LLM policy evaluation</p>
+            </div>
+
+            <div class="glass-card p-6 rounded-3xl relative overflow-hidden group hover:border-purple-500/40 transition-all">
+              <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-all"></div>
+              <p class="text-3xl font-black font-mono-tech text-white">10,500+</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-purple-400 mt-1">Neo4j Graph Edges</p>
+              <p class="text-[11px] text-slate-500 mt-0.5">Multi-hop skill & placement links</p>
+            </div>
+
+            <div class="glass-card p-6 rounded-3xl relative overflow-hidden group hover:border-pink-500/40 transition-all">
+              <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-pink-500/10 rounded-full blur-xl group-hover:bg-pink-500/20 transition-all"></div>
+              <p class="text-3xl font-black font-mono-tech text-white">&lt; 150ms</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-pink-400 mt-1">Graph Traversal Latency</p>
+              <p class="text-[11px] text-slate-500 mt-0.5">Sub-second match calculations</p>
+            </div>
+
+            <div class="glass-card p-6 rounded-3xl relative overflow-hidden group hover:border-emerald-500/40 transition-all">
+              <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all"></div>
+              <p class="text-3xl font-black font-mono-tech text-white">Zero</p>
+              <p class="text-xs font-bold uppercase tracking-wider text-emerald-400 mt-1">LLM Hallucinations</p>
+              <p class="text-[11px] text-slate-500 mt-0.5">Context-injected graph grounding</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Policy Simulator -->
+        <div class="glass-card p-8 rounded-3xl border border-white/10 relative overflow-hidden space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-5">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono-tech uppercase">
+                <i data-lucide="play" class="w-3 h-3 text-emerald-400"></i> Interactive Demo Engine
+              </div>
+              <h2 class="text-2xl font-bold text-white mt-1">Live Deterministic Policy Simulator</h2>
+              <p class="text-xs text-slate-400">Adjust parameters to see how our dual-engine verifies student eligibility in real-time.</p>
+            </div>
+            <div class="px-4 py-2 rounded-2xl bg-white/5 border border-white/10 text-right">
+              <span class="text-[10px] font-mono-tech text-slate-400 uppercase block">Simulated Decision</span>
+              <span :class="simulatedEligible ? 'text-emerald-400 text-glow-emerald' : 'text-rose-400'" class="text-lg font-black font-mono-tech">
+                {{ simulatedEligible ? '✓ PASS: ELIGIBLE' : '✕ FAIL: INELIGIBLE' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-4 md:col-span-2">
+              <div>
+                <div class="flex justify-between text-xs font-bold text-slate-300 mb-1.5">
+                  <span>Student CGPA:</span>
+                  <span class="text-indigo-400 font-mono-tech text-sm">{{ simStudentCGPA }} / 10.0</span>
+                </div>
+                <input v-model.number="simStudentCGPA" type="range" min="0" max="10" step="0.1" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-500">
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs font-bold text-slate-300 mb-1.5">
+                  <span>Active Backlogs:</span>
+                  <span :class="simBacklogs === 0 ? 'text-emerald-400' : 'text-rose-400'" class="font-mono-tech text-sm">{{ simBacklogs }} Active</span>
+                </div>
+                <input v-model.number="simBacklogs" type="range" min="0" max="5" step="1" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-500">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-2">Simulated Candidate Skills:</label>
+                <div class="flex flex-wrap gap-2">
+                  <button v-for="skill in ['Python', 'FastAPI', 'SQL', 'Docker', 'Neo4j', 'React', 'Kubernetes']" :key="skill" @click="toggleSimSkill(skill)" :class="simSkills.includes(skill) ? 'bg-brand-600 text-white border-brand-400 shadow-md shadow-brand-500/20' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10'" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all">
+                    {{ simSkills.includes(skill) ? '✓ ' : '+ ' }}{{ skill }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-[#090d16] border border-white/10 flex flex-col justify-between space-y-4">
+              <div>
+                <span class="text-[10px] font-mono-tech uppercase text-indigo-400 tracking-wider">Skill Overlap Score</span>
+                <p class="text-3xl font-black font-mono-tech text-white mt-1">{{ simMatchPercentage }}%</p>
+                
+                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden mt-2">
+                  <div class="bg-gradient-to-r from-brand-500 via-indigo-500 to-purple-500 h-full rounded-full transition-all duration-300" :style="{ width: simMatchPercentage + '%' }"></div>
+                </div>
+              </div>
+
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-slate-400">CGPA >= 7.5:</span>
+                  <span :class="simStudentCGPA >= 7.5 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'">
+                    {{ simStudentCGPA >= 7.5 ? 'PASS' : 'FAIL' }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-slate-400">Backlogs == 0:</span>
+                  <span :class="simBacklogs === 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'">
+                    {{ simBacklogs === 0 ? 'PASS' : 'FAIL' }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-slate-400">Mandatory (Python, SQL):</span>
+                  <span :class="simHasMandatorySkills ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'">
+                    {{ simHasMandatorySkills ? 'PASS' : 'FAIL' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 2. AUTH SCREEN -->
+      <!-- ============================================================ -->
+      <section v-if="activeTab === 'auth'" class="max-w-xl mx-auto py-8">
+        <div class="glass-card rounded-3xl p-8 border border-white/10 shadow-2xl space-y-6 relative overflow-hidden">
+          
+          <div class="text-center space-y-2">
+            <h2 class="text-3xl font-extrabold text-white tracking-tight">{{ authMode === 'login' ? 'Welcome Back' : 'Create an Account' }}</h2>
+            <p class="text-xs text-slate-400">Access CareerConnect AI Placement & GraphRAG Platform</p>
+
+            <div class="flex bg-white/5 p-1.5 rounded-2xl max-w-xs mx-auto mt-4 border border-white/10">
+              <button type="button" @click="authRole = 'student'; playSound('click')" :class="authRole === 'student' ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold shadow-lg shadow-brand-500/30' : 'text-slate-400 hover:text-white'" class="flex-1 py-2 rounded-xl text-xs transition-all">
+                🎓 Student
+              </button>
+              <button type="button" @click="authRole = 'recruiter'; playSound('click')" :class="authRole === 'recruiter' ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold shadow-lg shadow-brand-500/30' : 'text-slate-400 hover:text-white'" class="flex-1 py-2 rounded-xl text-xs transition-all">
+                🏢 Recruiter
+              </button>
+            </div>
+          </div>
+
+          <!-- Verification Success Banner -->
+          <div v-if="verificationBanner" class="p-4 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-200 text-xs font-semibold flex items-start gap-3 animate-pulse-glow">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+            <div>
+              <p class="font-bold text-sm text-emerald-300">Email Verification Confirmed</p>
+              <p class="mt-1 text-slate-300">{{ verificationBanner }}</p>
+            </div>
+          </div>
+
+          <div v-if="authError" class="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-rose-300 text-xs font-semibold">
+            {{ authError }}
+          </div>
+
+          <!-- Student Form -->
+          <form v-if="authRole === 'student'" @submit.prevent="handleStudentAuth" class="space-y-4">
+            
+            <!-- Email & Verification Step (in register mode) -->
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">University / Personal Email *</label>
+              <div class="flex gap-2">
+                <input v-model="studentForm.email" :disabled="otpVerified && authMode === 'register'" type="email" required placeholder="student@university.edu" class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500 disabled:opacity-60">
+                <button v-if="authMode === 'register' && !otpVerified" type="button" @click="sendEmailOTP(studentForm.email)" :disabled="otpLoading || !studentForm.email || otpCountdown > 0" class="px-4 py-2.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap">
+                  <i data-lucide="mail-check" class="w-4 h-4"></i>
+                  <span>{{ otpLoading ? 'Sending...' : (otpCountdown > 0 ? `${otpCountdown}s` : (otpSent ? 'Resend' : 'Send Verification Email')) }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Email Verification Dispatched Notification -->
+            <div v-if="authMode === 'register' && otpSent && !otpVerified" class="p-4 bg-brand-500/10 border border-brand-500/30 rounded-2xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                  <i data-lucide="mail" class="w-4 h-4 text-indigo-400"></i> Verification Sent to Gmail!
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono-tech">Expires in 60m</span>
+              </div>
+              <p class="text-xs text-slate-300">
+                A verification link and 6-digit code have been dispatched to <strong class="text-white">{{ studentForm.email }}</strong>. Please check your Gmail inbox and click the <strong>Verify Email Address</strong> button, or enter your 6-digit code below:
+              </p>
+
+              <div class="pt-2 border-t border-white/10 flex gap-2">
+                <input v-model="otpCode" type="text" maxlength="6" placeholder="Enter 6-digit code from Gmail" class="flex-1 px-4 py-2.5 bg-white/5 border border-white/20 rounded-xl text-center text-xs font-mono-tech tracking-widest text-white focus:outline-none focus:border-brand-400">
+                <button type="button" @click="verifyEmailOTP(studentForm.email)" :disabled="otpLoading || !otpCode" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all disabled:opacity-50">
+                  {{ otpLoading ? 'Verifying...' : 'Verify' }}
+                </button>
+              </div>
+              <div v-if="otpError" class="text-xs text-rose-400 font-semibold">{{ otpError }}</div>
+            </div>
+
+            <!-- Verified Email Badge -->
+            <div v-if="authMode === 'register' && otpVerified" class="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-between text-xs text-emerald-300 animate-fadeIn">
+              <span class="font-bold flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Email Authenticated & Verified via Gmail</span>
+              <span class="font-mono-tech text-[11px] opacity-80">{{ studentForm.email }}</span>
+            </div>
+
+            <!-- Full Name (Only when verified or in login mode) -->
+            <div v-if="authMode === 'register'">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Full Name *</label>
+              <input v-model="studentForm.full_name" type="text" required placeholder="Alex Johnson" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Password *</label>
+              <input v-model="studentForm.password" type="password" required minlength="6" placeholder="••••••••" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <template v-if="authMode === 'register'">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 mb-1">CGPA (0.0 - 10.0)</label>
+                  <input v-model.number="studentForm.cgpa" type="number" step="0.01" min="0" max="10" required class="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-mono-tech">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 mb-1">Active Backlogs</label>
+                  <input v-model.number="studentForm.backlogs" type="number" min="0" required class="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-mono-tech">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 mb-1">Programme</label>
+                  <input v-model="studentForm.programme" type="text" required class="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 mb-1">Grad Year</label>
+                  <input v-model.number="studentForm.graduation_year" type="number" required class="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-mono-tech">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">Initial Skills (comma-separated)</label>
+                <input v-model="studentForm.skillsInput" type="text" placeholder="Python, React, FastAPI, SQL, Docker" class="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white">
+              </div>
+            </template>
+
+            <button type="submit" :disabled="authLoading || (authMode === 'register' && !otpVerified)" class="w-full py-3.5 bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-brand-500/30 transition-all disabled:opacity-50 mt-4">
+              {{ authLoading ? 'Verifying credentials...' : (authMode === 'login' ? 'Sign In as Student' : (otpVerified ? 'Complete Student Registration' : 'Verify Gmail First to Register')) }}
+            </button>
+          </form>
+
+          <!-- Recruiter Form -->
+          <form v-if="authRole === 'recruiter'" @submit.prevent="handleRecruiterAuth" class="space-y-4">
+            
+            <!-- Email & Verification Step (in register mode) -->
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Recruiter Work Email *</label>
+              <div class="flex gap-2">
+                <input v-model="recruiterForm.email" :disabled="otpVerified && authMode === 'register'" type="email" required placeholder="recruiter@company.com" class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500 disabled:opacity-60">
+                <button v-if="authMode === 'register' && !otpVerified" type="button" @click="sendEmailOTP(recruiterForm.email)" :disabled="otpLoading || !recruiterForm.email || otpCountdown > 0" class="px-4 py-2.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap">
+                  <i data-lucide="mail-check" class="w-4 h-4"></i>
+                  <span>{{ otpLoading ? 'Sending...' : (otpCountdown > 0 ? `${otpCountdown}s` : (otpSent ? 'Resend' : 'Send Verification Email')) }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Verification Notification for Recruiter -->
+            <div v-if="authMode === 'register' && otpSent && !otpVerified" class="p-4 bg-brand-500/10 border border-brand-500/30 rounded-2xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                  <i data-lucide="mail" class="w-4 h-4 text-indigo-400"></i> Verification Sent to Gmail!
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono-tech">Expires in 60m</span>
+              </div>
+              <p class="text-xs text-slate-300">
+                A verification link and 6-digit code have been dispatched to <strong class="text-white">{{ recruiterForm.email }}</strong>. Please check your Gmail inbox and click the link, or enter your 6-digit code below:
+              </p>
+
+              <div class="pt-2 border-t border-white/10 flex gap-2">
+                <input v-model="otpCode" type="text" maxlength="6" placeholder="Enter 6-digit code from Gmail" class="flex-1 px-4 py-2.5 bg-white/5 border border-white/20 rounded-xl text-center text-xs font-mono-tech tracking-widest text-white focus:outline-none focus:border-brand-400">
+                <button type="button" @click="verifyEmailOTP(recruiterForm.email)" :disabled="otpLoading || !otpCode" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all disabled:opacity-50">
+                  {{ otpLoading ? 'Verifying...' : 'Verify' }}
+                </button>
+              </div>
+              <div v-if="otpError" class="text-xs text-rose-400 font-semibold">{{ otpError }}</div>
+            </div>
+
+            <!-- Verified Recruiter Email Badge -->
+            <div v-if="authMode === 'register' && otpVerified" class="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-between text-xs text-emerald-300 animate-fadeIn">
+              <span class="font-bold flex items-center gap-1.5"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Recruiter Email Verified via Gmail</span>
+              <span class="font-mono-tech text-[11px] opacity-80">{{ recruiterForm.email }}</span>
+            </div>
+
+            <div v-if="authMode === 'register'">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Company Name *</label>
+              <input v-model="recruiterForm.name" type="text" required placeholder="Acme Technologies Inc." class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Password *</label>
+              <input v-model="recruiterForm.password" type="password" required minlength="6" placeholder="••••••••" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+
+            <template v-if="authMode === 'register'">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 mb-1">Industry</label>
+                  <input v-model="recruiterForm.industry" type="text" required class="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 mb-1">Location</label>
+                  <input v-model="recruiterForm.location" type="text" required class="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white">
+                </div>
+              </div>
+            </template>
+
+            <button type="submit" :disabled="authLoading || (authMode === 'register' && !otpVerified)" class="w-full py-3.5 bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-brand-500/30 transition-all disabled:opacity-50 mt-4">
+              {{ authLoading ? 'Verifying credentials...' : (authMode === 'login' ? 'Sign In as Recruiter' : (otpVerified ? 'Complete Recruiter Registration' : 'Verify Work Email First')) }}
+            </button>
+          </form>
+
+          <div class="text-center pt-4 border-t border-white/10 text-xs text-slate-400">
+            <span v-if="authMode === 'login'">Don't have an account? <button @click="authMode = 'register'; playSound('click')" class="font-bold text-indigo-400 hover:underline">Register now</button></span>
+            <span v-else>Already have an account? <button @click="authMode = 'login'; playSound('click')" class="font-bold text-indigo-400 hover:underline">Sign In here</button></span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 3. STUDENT DASHBOARD VIEW -->
+      <!-- ============================================================ -->
+      <section v-if="activeTab === 'student_dashboard' && role === 'STUDENT'" class="space-y-8">
+        
+        <div class="glass-card p-8 rounded-3xl border border-white/10 relative overflow-hidden">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+            <div>
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-indigo-300 text-xs font-mono-tech uppercase mb-2">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-indigo-400"></i> Verified Student Profile
+              </div>
+              <h1 class="text-3xl font-extrabold text-white">Welcome back, {{ user.full_name }}</h1>
+              <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl">
+                {{ user.profile?.programme || 'B.Tech' }} • Class of {{ user.profile?.graduation_year || 2025 }} • Synced with Neo4j Knowledge Graph
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              <button @click="switchTab('student_drives')" class="px-5 py-2.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-500/30 flex items-center gap-2">
+                <i data-lucide="briefcase" class="w-4 h-4"></i> Explore Drives
+              </button>
+              <button @click="openProfileTab" class="px-5 py-2.5 bg-brand-500/20 hover:bg-brand-500/30 border border-brand-500/30 text-indigo-200 font-bold text-xs rounded-xl flex items-center gap-2">
+                <i data-lucide="user-check" class="w-4 h-4"></i> Profile Studio
+              </button>
+              <button @click="switchTab('student_chat')" class="px-5 py-2.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-bold text-xs rounded-xl flex items-center gap-2">
+                <i data-lucide="bot" class="w-4 h-4"></i> Ask AI Career Agent
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-card p-5 rounded-3xl border border-white/10">
+            <span class="text-[10px] font-mono-tech uppercase text-slate-400 block">Verified CGPA</span>
+            <p class="text-3xl font-black font-mono-tech text-white mt-1">{{ user.profile?.cgpa ? user.profile.cgpa.toFixed(2) : 'N/A' }}</p>
+            <p class="text-xs text-slate-400 mt-0.5">Active Backlogs: <strong class="text-white">{{ user.profile?.backlogs ?? 0 }}</strong></p>
+          </div>
+
+          <div class="glass-card p-5 rounded-3xl border border-white/10">
+            <span class="text-[10px] font-mono-tech uppercase text-slate-400 block">Neo4j Skill Nodes</span>
+            <p class="text-3xl font-black font-mono-tech text-indigo-400 mt-1">{{ user.skills?.length || 0 }}</p>
+            <button @click="openProfileTab" class="text-xs font-bold text-indigo-400 hover:underline mt-0.5">Manage Matrix →</button>
+          </div>
+
+          <div class="glass-card p-5 rounded-3xl border border-white/10">
+            <span class="text-[10px] font-mono-tech uppercase text-slate-400 block">Applications</span>
+            <p class="text-3xl font-black font-mono-tech text-purple-400 mt-1">{{ myApplications.length }}</p>
+            <button @click="switchTab('student_applications')" class="text-xs font-bold text-indigo-400 hover:underline mt-0.5">Track status →</button>
+          </div>
+
+          <div class="glass-card p-5 rounded-3xl border border-white/10">
+            <span class="text-[10px] font-mono-tech uppercase text-slate-400 block">Resume Parser</span>
+            <p class="text-sm font-bold text-emerald-400 mt-3 truncate">{{ myResume ? '✓ Parsed & Active' : 'Not Uploaded' }}</p>
+            <button @click="switchTab('student_resume')" class="text-xs font-bold text-indigo-400 hover:underline">Resume Studio →</button>
+          </div>
+        </div>
+
+        <!-- Skill Pills & Live Drives -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 glass-card p-6 rounded-3xl border border-white/10 space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-bold text-white">Recommended Placement Drives</h3>
+              <button @click="switchTab('student_drives')" class="text-xs font-bold text-indigo-400 hover:underline">View All</button>
+            </div>
+
+            <div v-if="drives.length === 0" class="text-xs text-slate-400 py-6 text-center">No active drives published yet.</div>
+            <div v-else class="space-y-3">
+              <div v-for="d in drives.slice(0, 3)" :key="d.id" class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-mono-tech font-bold text-indigo-400 uppercase">{{ d.company_name }}</span>
+                  <h4 class="text-sm font-bold text-white mt-0.5">{{ d.title }}</h4>
+                  <p class="text-xs text-slate-400 font-mono-tech">💰 {{ d.salary_package }} • Min CGPA: {{ d.eligibility_criteria?.min_cgpa || 0 }}</p>
+                </div>
+                <button @click="evaluateDrive(d)" class="px-4 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md">
+                  Check & Apply
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Skills Manager Card -->
+          <div class="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-base font-bold text-white">Your Skill Graph</h3>
+              <button @click="openProfileTab" class="text-xs font-bold text-indigo-400 hover:underline">Manage</button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span v-for="s in user.skills" :key="s" class="px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-indigo-300 rounded-xl text-xs font-bold font-mono-tech">
+                {{ s }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 4. ULTRA-ANIMATED STUDENT PROFILE STUDIO (HEAVY LOADED QUALITY) -->
+      <!-- ============================================================ -->
+      <section v-if="activeTab === 'student_profile' && role === 'STUDENT'" class="space-y-8 py-2">
+        
+        <!-- Cinematic Hero Header -->
+        <div class="glass-card hologram-border p-8 rounded-3xl relative overflow-hidden">
+          <div class="absolute -right-10 -top-10 w-60 h-60 bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 relative z-10">
+            
+            <!-- Avatar & Details -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <div class="relative">
+                <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-600 p-[2px] shadow-2xl shadow-brand-500/40">
+                  <div class="w-full h-full bg-[#090d16] rounded-3xl flex items-center justify-center text-white text-3xl font-black font-mono-tech">
+                    {{ (user.full_name || 'U').charAt(0) }}
+                  </div>
+                </div>
+                <div class="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-mono-tech text-emerald-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> ONLINE
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h1 class="text-3xl font-extrabold text-white tracking-tight">{{ user.full_name }}</h1>
+                  <span class="px-3 py-0.5 bg-brand-500/15 border border-brand-500/30 text-indigo-300 text-xs font-mono-tech font-bold rounded-full">
+                    #STUDENT-{{ (user.id || '0000').slice(-6).toUpperCase() }}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-300 flex items-center gap-2">
+                  <span>{{ user.email }}</span> • 
+                  <span class="text-indigo-400 font-bold font-mono-tech">{{ user.profile?.programme || 'B.Tech' }} ({{ user.profile?.branch || 'CSE' }})</span>
+                </p>
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <span class="px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-mono-tech text-slate-300">
+                    Graduation: <strong>{{ user.profile?.graduation_year || 2025 }}</strong>
+                  </span>
+                  <span class="px-2.5 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[11px] font-mono-tech text-indigo-300">
+                    Neo4j Triples: <strong>{{ (user.skills?.length || 0) + 2 }} Nodes</strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile Completeness Score Card -->
+            <div class="w-full lg:w-72 p-5 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl flex items-center justify-between gap-4">
+              <div>
+                <span class="text-[10px] font-mono-tech uppercase text-slate-400 block">Profile Strength</span>
+                <p class="text-2xl font-black font-mono-tech text-emerald-400 text-glow-emerald">94%</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Placement Ready Score</p>
+              </div>
+              <div class="relative w-14 h-14 flex items-center justify-center">
+                <svg class="w-14 h-14 transform -rotate-90">
+                  <circle cx="28" cy="28" r="22" stroke="rgba(255,255,255,0.1)" stroke-width="4" fill="transparent"/>
+                  <circle cx="28" cy="28" r="22" stroke="#10b981" stroke-width="4" stroke-dasharray="138" stroke-dashoffset="10" fill="transparent" class="transition-all duration-1000"/>
+                </svg>
+                <i data-lucide="shield-check" class="w-5 h-5 text-emerald-400 absolute"></i>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Grid: Left Edit Forms, Right Skills & Graph Inspector -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          <!-- Column 1: Academic & Verification Form (7 cols) -->
+          <div class="lg:col-span-7 space-y-6">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 space-y-6">
+              <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                <div>
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="award" class="w-5 h-5 text-indigo-400"></i> Academic & Placement Credentials
+                  </h3>
+                  <p class="text-xs text-slate-400">These credentials drive the deterministic placement eligibility engine.</p>
+                </div>
+                <span class="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono-tech font-bold rounded-lg">
+                  VERIFIED RECORD
+                </span>
+              </div>
+
+              <form @submit.prevent="saveStudentProfile" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold uppercase font-mono-tech text-slate-400 mb-1">Full Name</label>
+                    <input v-model="profileForm.full_name" type="text" required class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500 transition-colors">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold uppercase font-mono-tech text-slate-400 mb-1">Enrolled Degree Programme</label>
+                    <input v-model="profileForm.programme" type="text" required placeholder="B.Tech Computer Science" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500 transition-colors">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold uppercase font-mono-tech text-slate-400 mb-1">CGPA (0.0 - 10.0)</label>
+                    <input v-model.number="profileForm.cgpa" type="number" step="0.01" min="0" max="10" required class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-mono-tech focus:outline-none focus:border-brand-500 transition-colors">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold uppercase font-mono-tech text-slate-400 mb-1">Active Backlogs</label>
+                    <input v-model.number="profileForm.backlogs" type="number" min="0" required class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-mono-tech focus:outline-none focus:border-brand-500 transition-colors">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold uppercase font-mono-tech text-slate-400 mb-1">Graduation Batch</label>
+                    <input v-model.number="profileForm.graduation_year" type="number" required class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-mono-tech focus:outline-none focus:border-brand-500 transition-colors">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold uppercase font-mono-tech text-slate-400 mb-1">Branch / Specialization</label>
+                  <input v-model="profileForm.branch" type="text" placeholder="Artificial Intelligence & Machine Learning" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500 transition-colors">
+                </div>
+
+                <div class="pt-3 flex justify-between items-center">
+                  <span class="text-[11px] text-slate-500 font-mono-tech">Instant sync with Neo4j AuraDB</span>
+                  <button type="submit" :disabled="profileSaving" class="px-6 py-3 bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 flex items-center gap-2">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>{{ profileSaving ? 'Saving & Syncing...' : 'Save Profile Changes' }}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Resume Credentials Snapshot -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 space-y-4">
+              <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <i data-lucide="file-check" class="w-4 h-4 text-purple-400"></i> Active Resume Credentials
+                </h3>
+                <button @click="switchTab('student_resume')" class="text-xs font-bold text-indigo-400 hover:underline">
+                  Resume Studio →
+                </button>
+              </div>
+
+              <div v-if="myResume" class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-slate-400 font-mono-tech">FILE:</span>
+                  <strong class="text-white">{{ myResume.file_name }}</strong>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400 font-mono-tech">EXTRACTED EMAIL:</span>
+                  <strong class="text-indigo-300">{{ myResume.extracted_email || 'N/A' }}</strong>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-400 font-mono-tech">EXTRACTED SKILLS:</span>
+                  <strong class="text-emerald-400 font-mono-tech">{{ myResume.extracted_skills?.length || 0 }} Canonical Nodes</strong>
+                </div>
+              </div>
+              <div v-else class="p-4 rounded-2xl bg-white/5 text-center text-xs text-slate-400">
+                No resume uploaded yet. Visit Resume Studio to upload your PDF or DOCX.
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Column 2: Interactive Skill Matrix & Neo4j Triples (5 cols) -->
+          <div class="lg:col-span-5 space-y-6">
+            
+            <!-- Skill Matrix Studio -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 space-y-5">
+              <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <i data-lucide="cpu" class="w-4 h-4 text-brand-400"></i> Skill Graph Matrix
+                </h3>
+                <span class="px-2.5 py-0.5 bg-brand-500/10 border border-brand-500/30 text-indigo-300 font-mono-tech text-[10px] font-bold rounded-lg">
+                  {{ user.skills?.length || 0 }} Active Skills
+                </span>
+              </div>
+
+              <!-- Add Skill Input -->
+              <div class="flex gap-2">
+                <input v-model="newSkillText" @keyup.enter="addSkillFromInput" type="text" placeholder="Add skill (e.g. PyTorch, Docker)..." class="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500">
+                <button @click="addSkillFromInput" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+                  + Add
+                </button>
+              </div>
+
+              <!-- Quick Skill Suggestions -->
+              <div>
+                <span class="text-[10px] font-mono-tech uppercase text-slate-400 block mb-2">High Demand Tags (Click to Add):</span>
+                <div class="flex flex-wrap gap-1.5">
+                  <button v-for="tag in ['Python', 'FastAPI', 'Docker', 'Neo4j', 'React', 'Kubernetes', 'AWS', 'PyTorch', 'MongoDB']" :key="tag" @click="addSkillTag(tag)" :disabled="user.skills?.includes(tag)" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-tech border transition-all" :class="user.skills?.includes(tag) ? 'opacity-40 bg-white/5 border-white/5 text-slate-500' : 'bg-brand-500/10 border-brand-500/20 text-indigo-300 hover:bg-brand-500/20'">
+                    + {{ tag }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Active Skills Chips with Delete -->
+              <div class="pt-2">
+                <span class="text-[10px] font-mono-tech uppercase text-slate-400 block mb-2">Connected Knowledge Graph Nodes:</span>
+                <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1">
+                  <div v-for="skill in user.skills" :key="skill" class="group flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-brand-500/15 to-purple-500/15 border border-brand-500/30 rounded-xl text-xs font-mono-tech font-bold text-indigo-200 hover:border-brand-400 transition-all">
+                    <span>{{ skill }}</span>
+                    <button @click="removeSkill(skill)" class="text-slate-500 group-hover:text-rose-400 transition-colors ml-1" title="Remove Skill">✕</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Save / Sync Skills Button -->
+              <button @click="syncSkillsToNeo4j" :disabled="skillsSaving" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-500/25 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                <i data-lucide="refresh-cw" class="w-4 h-4" :class="skillsSaving ? 'animate-spin' : ''"></i>
+                <span>{{ skillsSaving ? 'Updating Neo4j Graph...' : 'Sync Skills to Neo4j AuraDB' }}</span>
+              </button>
+            </div>
+
+            <!-- Live Neo4j Graph Triples Visualizer Card -->
+            <div class="glass-card p-6 rounded-3xl border border-white/10 space-y-3 font-mono-tech text-xs">
+              <div class="flex items-center gap-2 text-indigo-400">
+                <i data-lucide="share-2" class="w-4 h-4"></i>
+                <span class="font-bold uppercase tracking-wider text-[11px]">Live Neo4j Graph Triples</span>
+              </div>
+              <div class="p-3.5 bg-black/40 rounded-2xl border border-white/5 space-y-2 text-[11px] text-slate-300">
+                <div class="truncate text-emerald-400">(:Student {name: "{{ user.full_name }}"})-[:STUDIES]->(:Programme {name: "{{ user.profile?.programme }}"})</div>
+                <div class="truncate text-indigo-300">(:Student)-[:HAS_SKILL]->(:Skill {count: {{ user.skills?.length || 0 }}}})</div>
+                <div class="truncate text-purple-400">(:Student)-[:APPLIED_TO]->(:PlacementDrive {count: {{ myApplications.length }}})</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 5. EXPLORE DRIVES PAGE -->
+      <!-- ============================================================ -->
+      <section v-if="activeTab === 'student_drives'" class="space-y-6">
+        <div class="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h1 class="text-3xl font-extrabold text-white">Campus Placement Drives</h1>
+              <p class="text-xs text-slate-400">Strict deterministic policy checks & multi-hop skill matching</p>
+            </div>
+            <span class="px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-mono-tech font-bold text-xs rounded-xl">
+              {{ filteredDrives.length }} Drives Available
+            </span>
+          </div>
+
+          <input v-model="driveSearch" type="text" placeholder="Search by job title, company name, or technology..." class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs text-white focus:outline-none focus:border-brand-500">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div v-for="d in filteredDrives" :key="d.id" class="glass-card glass-card-hover p-6 rounded-3xl border border-white/10 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-xs font-mono-tech font-bold text-indigo-400 uppercase">{{ d.company_name }}</span>
+                  <h3 class="text-lg font-bold text-white mt-0.5">{{ d.title }}</h3>
+                </div>
+                <span class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-xs font-bold font-mono-tech">{{ d.role_type }}</span>
+              </div>
+
+              <p class="text-xs text-slate-300 mt-2 line-clamp-3 leading-relaxed">{{ d.job_description }}</p>
+
+              <!-- Policy Criteria Specs -->
+              <div class="p-3.5 bg-white/5 rounded-2xl border border-white/5 text-xs text-slate-300 mt-4 space-y-1.5 font-mono-tech">
+                <div class="flex justify-between"><span>Package:</span><strong class="text-white">{{ d.salary_package }}</strong></div>
+                <div class="flex justify-between"><span>Min CGPA Requirement:</span><strong class="text-white">{{ d.eligibility_criteria?.min_cgpa || 0 }}</strong></div>
+                <div class="flex justify-between"><span>Max Backlogs Allowed:</span><strong class="text-white">{{ d.eligibility_criteria?.max_backlogs ?? 0 }}</strong></div>
+                <div v-if="d.eligibility_criteria?.mandatory_skills?.length" class="flex justify-between text-indigo-400 font-bold">
+                  <span>Mandatory Skills:</span><span>{{ d.eligibility_criteria.mandatory_skills.join(', ') }}</span>
+                </div>
+              </div>
+
+              <!-- Skills -->
+              <div class="flex flex-wrap gap-1.5 mt-3">
+                <span v-for="s in d.required_skills" :key="s" class="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-lg text-xs font-medium">
+                  {{ s }}
+                </span>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-white/10 flex gap-3">
+              <button @click="evaluateDrive(d)" class="flex-1 py-2.5 text-xs font-bold text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 rounded-xl transition-all flex items-center justify-center gap-1.5">
+                <i data-lucide="shield-check" class="w-4 h-4"></i> Check Eligibility
+              </button>
+              <button @click="applyDirectly(d.id)" class="px-6 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 rounded-xl shadow-lg shadow-brand-500/25 transition-all">
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 6. RESUME STUDIO PAGE -->
+      <!-- ============================================================ -->
+      <section v-if="activeTab === 'student_resume'" class="space-y-6">
+        <div class="glass-card p-6 rounded-3xl border border-white/10">
+          <h1 class="text-3xl font-extrabold text-white">Resume Studio & Entity Extraction</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Automated PDF/DOCX skill taxonomy parsing and Neo4j graph synchronization</p>
+        </div>
+
+        <div class="glass-card p-10 rounded-3xl border-2 border-dashed border-white/15 hover:border-brand-500/50 text-center transition-all">
+          <i data-lucide="upload-cloud" class="w-16 h-16 text-indigo-400 mx-auto mb-3 animate-float-slow"></i>
+          <h3 class="text-base font-bold text-white">Upload Your Resume (PDF or DOCX)</h3>
+          <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">Our engine extracts your education, projects, contact info, and canonical skill nodes automatically.</p>
+
+          <input type="file" ref="resumeFileInput" @change="uploadResumeFile" accept=".pdf,.docx" class="hidden">
+          <button @click="$refs.resumeFileInput.click()" :disabled="resumeUploading" class="mt-6 px-6 py-3 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-500/30 transition-all disabled:opacity-50">
+            {{ resumeUploading ? 'Extracting text & mapping Neo4j edges...' : 'Choose Resume File' }}
+          </button>
+        </div>
+
+        <div v-if="myResume" class="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[10px] font-mono-tech text-indigo-400 uppercase block">Extracted Entity</span>
+              <h3 class="text-xl font-bold text-white">{{ myResume.extracted_name || 'Candidate Name' }}</h3>
+              <p class="text-xs text-slate-400">{{ myResume.extracted_email }} • {{ myResume.extracted_phone }}</p>
+            </div>
+            <span class="px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-indigo-300 text-xs font-mono-tech font-bold rounded-lg">{{ myResume.file_name }}</span>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-bold uppercase font-mono-tech text-slate-400 mb-2">Canonical Skills Nodes ({{ myResume.extracted_skills?.length || 0 }})</h4>
+            <div class="flex flex-wrap gap-2">
+              <span v-for="s in myResume.extracted_skills" :key="s" class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-mono-tech font-bold">
+                {{ s }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 7. MY APPLICATIONS -->
+      <!-- ============================================================ -->
+      <section v-if="activeTab === 'student_applications'" class="space-y-6">
+        <div class="glass-card p-6 rounded-3xl border border-white/10">
+          <h1 class="text-3xl font-extrabold text-white">Application Status Pipeline</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Real-time status progression, graph match percentages, and audit logs.</p>
+        </div>
+
+        <div v-if="myApplications.length === 0" class="glass-card p-12 rounded-3xl text-center">
+          <i data-lucide="file-check-2" class="w-12 h-12 text-slate-600 mx-auto mb-2"></i>
+          <p class="text-base font-bold text-white">No applications submitted yet</p>
+          <button @click="switchTab('student_drives')" class="mt-2 text-xs font-bold text-indigo-400 hover:underline">Explore live placement drives →</button>
+        </div>
+
+        <div v-else class="space-y-4">
+          <div v-for="app in myApplications" :key="app.id" class="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-xs font-mono-tech font-bold text-indigo-400 uppercase">{{ app.company_name }}</span>
+                <h3 class="text-lg font-bold text-white">{{ app.drive_title }}</h3>
+                <p class="text-xs text-slate-400 mt-0.5 font-mono-tech">Applied on {{ new Date(app.created_at).toLocaleDateString() }}</p>
+              </div>
+              <div class="text-right">
+                <span class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold font-mono-tech rounded-lg text-xs">{{ app.status }}</span>
+                <p class="text-sm font-black text-indigo-400 font-mono-tech mt-1">Match: {{ app.match_percentage?.toFixed(1) }}%</p>
+              </div>
+            </div>
+
+            <div class="p-4 bg-white/5 rounded-2xl text-xs space-y-2">
+              <span class="font-bold text-slate-300 block">Matched Skills in Neo4j Graph:</span>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="s in app.matched_skills" :key="s" class="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-lg font-mono-tech text-xs">{{ s }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 8. AI GRAPHRAG CAREER ASSISTANT -->
+      <!-- ============================================================ -->
+      <section v-if="activeTab === 'student_chat'" class="h-[calc(100vh-12rem)] flex flex-col glass-card rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+        
+        <!-- Header -->
+        <div class="p-4 bg-white/5 border-b border-white/10 flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <i data-lucide="bot" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-white">GraphRAG AI Career Assistant</h3>
+              <p class="text-[11px] font-mono-tech text-indigo-300">Neo4j Multi-Hop Graph Traversal</p>
+            </div>
+          </div>
+
+          <select v-model="chatDriveId" class="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-brand-500">
+            <option value="">General Query (All Drives)</option>
+            <option v-for="d in drives" :key="d.id" :value="d.id">{{ d.company_name }} — {{ d.title }}</option>
+          </select>
+        </div>
+
+        <!-- Messages Thread -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          <div v-for="(m, idx) in chatMessages" :key="idx" :class="m.sender === 'user' ? 'ml-auto bg-gradient-to-r from-brand-600 to-indigo-600 text-white rounded-tr-none shadow-lg' : 'mr-auto bg-white/5 border border-white/10 text-slate-200 rounded-tl-none'" class="max-w-2xl p-4 rounded-2xl text-xs leading-relaxed">
+            <p class="whitespace-pre-wrap">{{ m.text }}</p>
+
+            <!-- Suggested Skills -->
+            <div v-if="m.suggestedSkills?.length" class="mt-3 pt-2 border-t border-white/10">
+              <span class="font-bold text-purple-300 block mb-1.5">High-Impact Skills to Acquire:</span>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="s in m.suggestedSkills" :key="s" class="px-2.5 py-0.5 bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-lg text-xs font-mono-tech">{{ s }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="chatLoading" class="p-3 bg-white/5 border border-white/10 rounded-xl text-xs text-indigo-300 animate-pulse flex items-center gap-2">
+            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+            <span>Traversing Neo4j placement knowledge graph & generating grounded answer...</span>
+          </div>
+        </div>
+
+        <!-- FAQs -->
+        <div v-if="chatFaqs.length" class="px-4 py-2.5 bg-black/20 border-t border-white/5 flex items-center gap-2 overflow-x-auto">
+          <span class="text-[10px] font-mono-tech uppercase text-slate-400 shrink-0">FAQS:</span>
+          <button v-for="(f, idx) in chatFaqs.slice(0, 3)" :key="idx" @click="sendChatMessage(f.question)" class="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs text-slate-300 whitespace-nowrap transition-all">
+            {{ f.question }}
+          </button>
+        </div>
+
+        <!-- Input Form -->
+        <div class="p-4 bg-[#080c14] border-t border-white/10">
+          <form @submit.prevent="sendChatMessage()" class="flex gap-2">
+            <input v-model="chatInput" type="text" placeholder="Ask about placement eligibility, missing skills, interview preparation..." class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs text-white focus:outline-none focus:border-brand-500">
+            <button type="submit" :disabled="chatLoading || !chatInput.trim()" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-2xl shadow-lg shadow-purple-500/25 disabled:opacity-50 flex items-center gap-2">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Ask AI</span>
+            </button>
+          </form>
+        </div>
+
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 9. RECRUITER COMMAND HUB & PROFILE -->
+      <!-- ============================================================ -->
+      <section v-if="activeTab === 'recruiter_dashboard' && role === 'RECRUITER'" class="space-y-8">
+        <div class="glass-card p-8 rounded-3xl border border-white/10">
+          <h1 class="text-3xl font-extrabold text-white">Recruiter Command Center</h1>
+          <p class="text-xs text-slate-400 mt-1">Manage placement drives, configure deterministic policy filters, and evaluate candidate pipelines.</p>
+          <button @click="switchTab('recruiter_post_drive')" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-500/30">
+            + Post New Placement Drive
+          </button>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
+          <h3 class="text-lg font-bold text-white">Your Posted Recruitment Drives</h3>
+          <div v-if="myCompanyDrives.length === 0" class="text-xs text-slate-400 py-8 text-center">
+            No drives posted yet. Create your first drive to start receiving verified candidates.
+          </div>
+          <div v-else class="divide-y divide-white/10">
+            <div v-for="d in myCompanyDrives" :key="d.id" class="py-4 flex justify-between items-center">
+              <div>
+                <h4 class="text-sm font-bold text-white">{{ d.title }}</h4>
+                <p class="text-xs text-slate-400 font-mono-tech">💰 {{ d.salary_package }} • Min CGPA: {{ d.eligibility_criteria?.min_cgpa || 0 }} • Status: <strong class="text-indigo-400">{{ d.status }}</strong></p>
+              </div>
+              <button @click="viewApplicants(d)" class="px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold text-xs rounded-xl">
+                View Applicants Pipeline →
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recruiter Profile Page -->
+      <section v-if="activeTab === 'recruiter_profile' && role === 'RECRUITER'" class="max-w-3xl mx-auto space-y-6">
+        <div class="glass-card p-8 rounded-3xl border border-white/10 space-y-4">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-purple-600 flex items-center justify-center text-2xl font-black text-white font-mono-tech">
+              {{ (user.name || 'C').charAt(0) }}
+            </div>
+            <div>
+              <h1 class="text-2xl font-extrabold text-white">{{ user.name }}</h1>
+              <p class="text-xs text-slate-400">{{ user.email }} • {{ user.industry }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
+          <h3 class="text-base font-bold text-white">Company Identity & Headquarters</h3>
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <span class="text-slate-400 font-mono-tech block">LOCATION:</span>
+              <strong class="text-white">{{ user.location || 'Bengaluru / Remote' }}</strong>
+            </div>
+            <div>
+              <span class="text-slate-400 font-mono-tech block">ACTIVE DRIVES:</span>
+              <strong class="text-indigo-400">{{ myCompanyDrives.length }} Drives</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Post Drive -->
+      <section v-if="activeTab === 'recruiter_post_drive' && role === 'RECRUITER'" class="max-w-3xl mx-auto space-y-6">
+        <div class="glass-card p-6 rounded-3xl border border-white/10">
+          <h1 class="text-2xl font-extrabold text-white">Post New Placement Drive</h1>
+          <p class="text-xs text-slate-400">Configure deterministic eligibility filters and required skill graph nodes.</p>
+        </div>
+
+        <form @submit.prevent="handleCreateDrive" class="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Job Title *</label>
+              <input v-model="postDriveForm.title" type="text" required placeholder="Software Engineer" class="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Role Type</label>
+              <select v-model="postDriveForm.role_type" class="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white">
+                <option value="Full-Time">Full-Time</option>
+                <option value="Internship">Internship</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Salary Package *</label>
+              <input v-model="postDriveForm.salary_package" type="text" required placeholder="14 LPA" class="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-mono-tech">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Location</label>
+              <input v-model="postDriveForm.location" type="text" required placeholder="Bengaluru / Hybrid" class="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Job Description *</label>
+            <textarea v-model="postDriveForm.job_description" rows="3" required placeholder="Responsibilities and qualifications..." class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Target Skills (comma-separated)</label>
+            <input v-model="postDriveForm.requiredSkillsInput" type="text" placeholder="Python, FastAPI, SQL, Docker, Neo4j" class="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white">
+          </div>
+
+          <!-- Deterministic Policy Filters -->
+          <div class="p-4 bg-brand-500/10 border border-brand-500/20 rounded-2xl space-y-3">
+            <span class="text-xs font-bold uppercase text-indigo-300 block font-mono-tech">Strict Eligibility Policies</span>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-300 mb-0.5">Min CGPA</label>
+                <input v-model.number="postDriveForm.min_cgpa" type="number" step="0.01" min="0" max="10" required class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-mono-tech">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-300 mb-0.5">Max Backlogs</label>
+                <input v-model.number="postDriveForm.max_backlogs" type="number" min="0" required class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white font-mono-tech">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-300 mb-0.5">Mandatory Skills (100% Required)</label>
+              <input v-model="postDriveForm.mandatorySkillsInput" type="text" placeholder="Python, SQL" class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-500/30">
+            Publish Placement Drive
+          </button>
+        </form>
+      </section>
+
+      <!-- Applicants List View -->
+      <section v-if="activeTab === 'recruiter_applicants' && role === 'RECRUITER'" class="space-y-6">
+        <div class="glass-card p-6 rounded-3xl border border-white/10 flex justify-between items-center">
+          <div>
+            <button @click="switchTab('recruiter_dashboard')" class="text-xs font-bold text-indigo-400 hover:underline mb-1">← Back to Hub</button>
+            <h1 class="text-xl font-extrabold text-white">Applicants for {{ selectedDriveForApplicants?.title }}</h1>
+          </div>
+          <span class="px-3.5 py-1.5 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-mono-tech font-bold text-xs rounded-xl">
+            {{ currentDriveApplicants.length }} Candidates
+          </span>
+        </div>
+
+        <div v-if="currentDriveApplicants.length === 0" class="glass-card p-12 rounded-3xl text-center text-xs text-slate-400">
+          No candidates have applied to this drive yet.
+        </div>
+
+        <div v-else class="glass-card rounded-3xl border border-white/10 overflow-hidden">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-white/5 border-b border-white/10 text-slate-400 uppercase font-mono-tech text-[10px]">
+              <tr>
+                <th class="p-4">Candidate</th>
+                <th class="p-4">CGPA</th>
+                <th class="p-4">Match %</th>
+                <th class="p-4">Status</th>
+                <th class="p-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+              <tr v-for="app in currentDriveApplicants" :key="app.id" class="hover:bg-white/5">
+                <td class="p-4 font-bold text-white">{{ app.student_name }}<br><span class="text-[11px] font-normal text-slate-400">{{ app.student_email }}</span></td>
+                <td class="p-4 font-mono-tech font-bold text-white">{{ app.student_cgpa }}</td>
+                <td class="p-4 font-mono-tech font-black text-indigo-400">{{ app.match_percentage?.toFixed(1) }}%</td>
+                <td class="p-4"><span class="px-2.5 py-1 bg-indigo-500/10 text-indigo-300 rounded-lg text-xs font-mono-tech">{{ app.status }}</span></td>
+                <td class="p-4 text-right">
+                  <button @click="openStatusModal(app)" class="px-3 py-1.5 bg-brand-500/10 hover:bg-brand-500/20 text-indigo-300 border border-brand-500/30 rounded-xl font-bold text-xs">
+                    Update Status
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 10. DETERMINISTIC ELIGIBILITY BREAKDOWN MODAL -->
+      <!-- ============================================================ -->
+      <div v-if="eligibilityModalOpen" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-lg w-full p-6 space-y-5 border border-white/15 shadow-2xl">
+          <div class="flex justify-between items-center border-b border-white/10 pb-3">
+            <h3 class="font-bold text-white">Eligibility Check: {{ activeDrive?.title }}</h3>
+            <button @click="eligibilityModalOpen = false" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+          </div>
+
+          <div v-if="eligibilityChecking" class="py-8 text-center text-xs text-indigo-300 animate-pulse">
+            Executing deterministic policy pipeline & checking Neo4j graph overlap...
+          </div>
+
+          <div v-else-if="eligibilityResult" class="space-y-4 text-xs">
+            <div :class="eligibilityResult.eligible ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300'" class="p-4 rounded-2xl border flex items-center gap-3">
+              <span class="text-xl font-black font-mono-tech">{{ eligibilityResult.eligible ? '✓ PASS: ELIGIBLE' : '✕ FAIL: INELIGIBLE' }}</span>
+            </div>
+
+            <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+              <div class="flex justify-between font-mono-tech text-slate-300 mb-1.5 font-bold">
+                <span>Neo4j Skill Overlap Score:</span>
+                <span class="text-indigo-400">{{ eligibilityResult.match_percentage?.toFixed(1) }}%</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-gradient-to-r from-brand-500 to-indigo-500 h-full rounded-full" :style="{ width: (eligibilityResult.match_percentage || 0) + '%' }"></div>
+              </div>
+            </div>
+
+            <!-- Details -->
+            <div v-if="eligibilityResult.policy_details" class="space-y-2">
+              <div v-for="(val, key) in eligibilityResult.policy_details" :key="key" class="p-3 bg-white/5 rounded-xl flex justify-between items-center border border-white/5">
+                <div>
+                  <span class="font-bold uppercase font-mono-tech text-[10px] text-slate-300">{{ key }}</span>
+                  <p class="text-[11px] text-slate-400">{{ val.message }}</p>
+                </div>
+                <span :class="val.status === 'PASS' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-rose-400 bg-rose-500/10 border-rose-500/30'" class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold font-mono-tech border">{{ val.status }}</span>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t border-white/10">
+              <button @click="eligibilityModalOpen = false" class="px-4 py-2 text-slate-400 hover:text-white font-semibold">Close</button>
+              <button v-if="eligibilityResult.eligible" @click="applyDirectly(activeDrive.id); eligibilityModalOpen = false;" class="px-6 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30">
+                Confirm & Submit Application
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Modal -->
+      <div v-if="statusModalOpen" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-md w-full p-6 space-y-4 border border-white/15 shadow-2xl">
+          <div class="flex justify-between items-center border-b border-white/10 pb-3">
+            <h3 class="font-bold text-white">Update Candidate Status</h3>
+            <button @click="statusModalOpen = false" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+          </div>
+
+          <form @submit.prevent="handleUpdateApplicantStatus" class="space-y-3 text-xs">
+            <div>
+              <label class="block font-bold text-slate-400 mb-1 uppercase font-mono-tech">Select Pipeline Stage</label>
+              <select v-model="statusUpdateForm.status" class="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-bold">
+                <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+                <option value="SHORTLISTED">SHORTLISTED</option>
+                <option value="ASSESSMENT">ASSESSMENT (Test)</option>
+                <option value="INTERVIEW">INTERVIEW</option>
+                <option value="SELECTED">SELECTED (Offer Extended)</option>
+                <option value="REJECTED">REJECTED</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-400 mb-1 uppercase font-mono-tech">Review Remarks</label>
+              <textarea v-model="statusUpdateForm.remarks" rows="3" placeholder="Audit feedback..." class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t border-white/10">
+              <button type="button" @click="statusModalOpen = false" class="px-4 py-2 text-slate-400 hover:text-white">Cancel</button>
+              <button type="submit" class="px-5 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold rounded-xl shadow-md">Save & Sync</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-white/5 py-8 text-center text-xs text-slate-500 relative z-10">
+      <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <span class="font-mono-tech text-slate-400">CareerConnect AI • Multi-Database Placement Architecture</span>
+        <span>Dual Engine: MongoDB Atlas + Neo4j AuraDB + Ollama GraphRAG</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- NEURAL PARTICLES CANVAS SCRIPT -->
+  <script>
+    let audioCtx = null;
+    function playSound(type) {
+      if (!window.vueApp || !window.vueApp.soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'click') {
+          osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.05);
+          gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.05);
+        } else if (type === 'success') {
+          osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        }
+      } catch (e) {}
+    }
+
+    (function initCanvas() {
+      const canvas = document.getElementById('neuralCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
+      const mouse = { x: null, y: null };
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.x;
+        mouse.y = e.y;
+      });
+      resize();
+
+      class Particle {
+        constructor() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.size = Math.random() * 2 + 1;
+          this.vx = (Math.random() - 0.5) * 0.6;
+          this.vy = (Math.random() - 0.5) * 0.6;
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          if (this.x < 0 || this.x > width) this.vx *= -1;
+          if (this.y < 0 || this.y > height) this.vy *= -1;
+        }
+        draw() {
+          ctx.fillStyle = 'rgba(99, 102, 241, 0.4)';
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      for (let i = 0; i < 45; i++) {
+        particles.push(new Particle());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 140) {
+              ctx.strokeStyle = `rgba(99, 102, 241, ${0.25 * (1 - dist / 140)})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+  </script>
+
+  <!-- ============================================================ -->
+  <!-- MAIN VUE APPLICATION -->
+  <!-- ============================================================ -->
+  <script>
+    const API_BASE = 'http://localhost:8000/api/v1';
+    const { createApp } = Vue;
+
+    const appInstance = createApp({
+      data() {
+        return {
+          activeTab: 'landing',
+          backendConnected: false,
+          soundEnabled: true,
+          token: localStorage.getItem('token') || null,
+          role: localStorage.getItem('role') || null,
+          user: JSON.parse(localStorage.getItem('user') || '{}'),
+
+          // Profile Studio Form
+          profileForm: {
+            full_name: '',
+            cgpa: 8.0,
+            backlogs: 0,
+            programme: 'B.Tech',
+            branch: 'Computer Science',
+            graduation_year: 2025,
+          },
+          newSkillText: '',
+          profileSaving: false,
+          skillsSaving: false,
+
+          // Interactive Simulator state
+          simStudentCGPA: 8.2,
+          simBacklogs: 0,
+          simSkills: ['Python', 'FastAPI', 'SQL', 'Docker'],
+
+          // Auth & Email OTP & Link Verification
+          authMode: 'login',
+          authRole: 'student',
+          authError: '',
+          authLoading: false,
+          otpSent: false,
+          otpVerified: false,
+          otpCode: '',
+          otpLoading: false,
+          otpError: '',
+          otpSuccess: '',
+          debugOtp: '',
+          otpCountdown: 0,
+          verificationUrl: '',
+          verificationBanner: '',
+          studentForm: {
+            email: '',
+            password: '',
+            full_name: '',
+            cgpa: 8.0,
+            backlogs: 0,
+            programme: 'B.Tech Computer Science',
+            graduation_year: 2025,
+            skillsInput: 'Python, FastAPI, SQL, React',
+          },
+          recruiterForm: {
+            name: '',
+            email: '',
+            password: '',
+            industry: 'Information Technology',
+            location: 'Bengaluru / Remote',
+          },
+
+          // Drives
+          publicDrives: [],
+          drives: [],
+          myCompanyDrives: [],
+          driveSearch: '',
+
+          // Applications
+          myApplications: [],
+
+          // Resume
+          myResume: null,
+          resumeUploading: false,
+
+          // Eligibility Modal
+          eligibilityModalOpen: false,
+          activeDrive: null,
+          eligibilityChecking: false,
+          eligibilityResult: null,
+
+          // Chat
+          chatMessages: [
+            { text: 'Hello! I am your AI Placement Assistant powered by Neo4j GraphRAG. Ask me anything about drive eligibility, skill gaps, or career preparation.', sender: 'ai' }
+          ],
+          chatInput: '',
+          chatDriveId: '',
+          chatFaqs: [],
+          chatLoading: false,
+
+          // Recruiter Post Drive
+          postDriveForm: {
+            title: '',
+            role_type: 'Full-Time',
+            salary_package: '14 LPA',
+            location: 'Bengaluru / Hybrid',
+            job_description: '',
+            requiredSkillsInput: 'Python, FastAPI, SQL, Docker, Neo4j',
+            min_cgpa: 7.5,
+            max_backlogs: 0,
+            mandatorySkillsInput: 'Python, SQL',
+          },
+
+          // Applicants
+          selectedDriveForApplicants: null,
+          currentDriveApplicants: [],
+          statusModalOpen: false,
+          selectedAppToUpdate: null,
+          statusUpdateForm: {
+            status: 'SHORTLISTED',
+            remarks: '',
+          },
+        };
+      },
+      computed: {
+        simHasMandatorySkills() {
+          return this.simSkills.includes('Python') && this.simSkills.includes('SQL');
+        },
+        simMatchPercentage() {
+          const required = ['Python', 'FastAPI', 'SQL', 'Docker', 'Neo4j'];
+          const matched = required.filter(s => this.simSkills.includes(s));
+          return Math.round((matched.length / required.length) * 100);
+        },
+        simulatedEligible() {
+          return this.simStudentCGPA >= 7.5 && this.simBacklogs === 0 && this.simHasMandatorySkills;
+        },
+        filteredDrives() {
+          if (!this.driveSearch.trim()) return this.drives;
+          const q = this.driveSearch.toLowerCase();
+          return this.drives.filter(d => 
+            d.title.toLowerCase().includes(q) || 
+            d.company_name.toLowerCase().includes(q) ||
+            d.required_skills?.some(s => s.toLowerCase().includes(q))
+          );
+        }
+      },
+      mounted() {
+        window.vueApp = this;
+        this.checkBackend();
+        this.fetchPublicDrives();
+
+        // Check for Verification Link from Email click
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('action') === 'verify_email') {
+          const token = urlParams.get('token');
+          const email = urlParams.get('email');
+          if (token && email) {
+            this.handleVerificationLinkFromUrl(token, email);
+          }
+        }
+
+        if (this.token) {
+          if (this.role === 'STUDENT') {
+            this.activeTab = 'student_dashboard';
+            this.loadStudentData();
+          } else if (this.role === 'RECRUITER') {
+            this.activeTab = 'recruiter_dashboard';
+            this.loadRecruiterData();
+          }
+        }
+        this.$nextTick(() => { lucide.createIcons(); });
+      },
+      updated() {
+        this.$nextTick(() => { lucide.createIcons(); });
+      },
+      methods: {
+        toggleSound() {
+          this.soundEnabled = !this.soundEnabled;
+        },
+        playSound(type) {
+          playSound(type);
+        },
+        openProfileTab() {
+          this.playSound('click');
+          if (this.role === 'STUDENT') {
+            this.activeTab = 'student_profile';
+            this.populateProfileForm();
+          } else {
+            this.activeTab = 'recruiter_profile';
+          }
+        },
+        populateProfileForm() {
+          this.profileForm.full_name = this.user.full_name || '';
+          this.profileForm.cgpa = this.user.profile?.cgpa || 8.0;
+          this.profileForm.backlogs = this.user.profile?.backlogs ?? 0;
+          this.profileForm.programme = this.user.profile?.programme || 'B.Tech';
+          this.profileForm.branch = this.user.profile?.branch || 'Computer Science';
+          this.profileForm.graduation_year = this.user.profile?.graduation_year || 2025;
+        },
+        async saveStudentProfile() {
+          this.playSound('click');
+          this.profileSaving = true;
+          try {
+            const payload = {
+              full_name: this.profileForm.full_name,
+              cgpa: parseFloat(this.profileForm.cgpa) || 0.0,
+              backlogs: parseInt(this.profileForm.backlogs) || 0,
+              programme: this.profileForm.programme,
+              branch: this.profileForm.branch,
+              graduation_year: parseInt(this.profileForm.graduation_year) || 2025,
+              profile: {
+                cgpa: parseFloat(this.profileForm.cgpa) || 0.0,
+                backlogs: parseInt(this.profileForm.backlogs) || 0,
+                programme: this.profileForm.programme,
+                branch: this.profileForm.branch,
+                graduation_year: parseInt(this.profileForm.graduation_year) || 2025,
+              }
+            };
+            const res = await axios.put(`${API_BASE}/students/profile/me`, payload, this.getAuthHeader());
+            this.user = res.data;
+            localStorage.setItem('user', JSON.stringify(this.user));
+            this.populateProfileForm();
+            this.playSound('success');
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            alert('Profile updated and synchronized to MongoDB & Neo4j graph successfully!');
+          } catch (e) {
+            alert(e.response?.data?.detail || 'Failed to update profile.');
+          } finally {
+            this.profileSaving = false;
+          }
+        },
+        addSkillTag(tag) {
+          if (!this.user.skills) this.user.skills = [];
+          if (!this.user.skills.includes(tag)) {
+            this.user.skills.push(tag);
+            this.playSound('click');
+          }
+        },
+        addSkillFromInput() {
+          const text = this.newSkillText.trim();
+          if (!text) return;
+          if (!this.user.skills) this.user.skills = [];
+          if (!this.user.skills.includes(text)) {
+            this.user.skills.push(text);
+            this.playSound('click');
+          }
+          this.newSkillText = '';
+        },
+        removeSkill(skill) {
+          this.playSound('click');
+          this.user.skills = (this.user.skills || []).filter(s => s !== skill);
+        },
+        async syncSkillsToNeo4j() {
+          this.playSound('click');
+          this.skillsSaving = true;
+          try {
+            const res = await axios.put(`${API_BASE}/students/profile/me/skills`, {
+              skills: this.user.skills || []
+            }, this.getAuthHeader());
+            this.user = res.data;
+            localStorage.setItem('user', JSON.stringify(this.user));
+            this.playSound('success');
+            confetti({ particleCount: 100, spread: 80 });
+            alert('Skill nodes synchronized to Neo4j AuraDB graph!');
+          } catch (e) {
+            alert(e.response?.data?.detail || 'Failed to sync skills.');
+          } finally {
+            this.skillsSaving = false;
+          }
+        },
+        toggleSimSkill(skill) {
+          this.playSound('click');
+          if (this.simSkills.includes(skill)) {
+            this.simSkills = this.simSkills.filter(s => s !== skill);
+          } else {
+            this.simSkills.push(skill);
+          }
+        },
+        switchTab(tab) {
+          this.playSound('click');
+          this.activeTab = tab;
+          if (tab === 'student_profile') {
+            this.populateProfileForm();
+          }
+        },
+        getAuthHeader() {
+          return { headers: { Authorization: `Bearer ${this.token}` } };
+        },
+        async checkBackend() {
+          try {
+            await axios.get('http://localhost:8000/health');
+            this.backendConnected = true;
+          } catch {
+            this.backendConnected = false;
+          }
+        },
+        async fetchPublicDrives() {
+          try {
+            const res = await axios.get(`${API_BASE}/drives/?status=PUBLISHED`);
+            this.publicDrives = res.data || [];
+            this.drives = res.data || [];
+          } catch (e) {
+            console.warn('Could not fetch public drives', e);
+          }
+        },
+        navTabClass(tab) {
+          return this.activeTab === tab
+            ? 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-brand-500/20 text-indigo-300 border border-brand-500/30'
+            : 'px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors';
+        },
+        openAuth(mode, role) {
+          this.playSound('click');
+          this.authMode = mode;
+          this.authRole = role;
+          this.authError = '';
+          this.otpSent = false;
+          this.otpVerified = false;
+          this.otpCode = '';
+          this.otpError = '';
+          this.otpSuccess = '';
+          this.debugOtp = '';
+          this.verificationUrl = '';
+          this.verificationBanner = '';
+          this.otpCountdown = 0;
+          this.activeTab = 'auth';
+        },
+        async handleVerificationLinkFromUrl(token, email) {
+          this.authLoading = true;
+          try {
+            const res = await axios.get(`${API_BASE}/auth/verify-link?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
+            this.otpVerified = true;
+            this.studentForm.email = email;
+            this.recruiterForm.email = email;
+            this.authMode = 'register';
+            this.activeTab = 'auth';
+            this.verificationBanner = `Email '${email}' authenticated via secure magic link. Complete your registration password & details below.`;
+            this.playSound('success');
+            confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } catch (e) {
+            alert(e.response?.data?.detail || 'Email verification link is invalid or expired.');
+          } finally {
+            this.authLoading = false;
+          }
+        },
+        async sendEmailOTP(email) {
+          if (!email || !email.includes('@')) {
+            this.otpError = 'Please enter a valid Gmail address first.';
+            return;
+          }
+          this.playSound('click');
+          this.otpLoading = true;
+          this.otpError = '';
+          this.otpSuccess = '';
+          try {
+            const res = await axios.post(`${API_BASE}/auth/send-verification-link`, { email: email.trim() });
+            this.otpSent = true;
+            this.otpSuccess = res.data.message || 'Verification email dispatched to Gmail!';
+            this.otpCountdown = 60;
+            const timer = setInterval(() => {
+              this.otpCountdown--;
+              if (this.otpCountdown <= 0) clearInterval(timer);
+            }, 1000);
+            this.playSound('success');
+          } catch (e) {
+            this.otpError = e.response?.data?.detail || 'Failed to dispatch verification email.';
+          } finally {
+            this.otpLoading = false;
+          }
+        },
+        async verifyEmailOTP(email) {
+          if (!this.otpCode || this.otpCode.trim().length < 6) {
+            this.otpError = 'Please enter the full 6-digit OTP code.';
+            return;
+          }
+          this.playSound('click');
+          this.otpLoading = true;
+          this.otpError = '';
+          try {
+            await axios.post(`${API_BASE}/auth/verify-otp`, {
+              email: email.trim(),
+              otp: this.otpCode.trim(),
+            });
+            this.otpVerified = true;
+            this.otpSuccess = '✓ Verified successfully!';
+            this.playSound('success');
+            confetti({ particleCount: 70, spread: 60 });
+          } catch (e) {
+            this.otpError = e.response?.data?.detail || 'Invalid or expired OTP code.';
+          } finally {
+            this.otpLoading = false;
+          }
+        },
+        async handleStudentAuth() {
+          this.authError = '';
+          this.authLoading = true;
+          try {
+            let res;
+            if (this.authMode === 'login') {
+              res = await axios.post(`${API_BASE}/students/login`, {
+                email: this.studentForm.email,
+                password: this.studentForm.password,
+              });
+            } else {
+              if (!this.otpVerified) {
+                this.authError = 'Please verify your university email with OTP first.';
+                this.authLoading = false;
+                return;
+              }
+              const payload = {
+                email: this.studentForm.email,
+                password: this.studentForm.password,
+                full_name: this.studentForm.full_name,
+                cgpa: parseFloat(this.studentForm.cgpa) || 0.0,
+                backlogs: parseInt(this.studentForm.backlogs) || 0,
+                programme: this.studentForm.programme,
+                graduation_year: parseInt(this.studentForm.graduation_year) || 2025,
+                skills: this.studentForm.skillsInput.split(',').map(s => s.trim()).filter(Boolean),
+                otp: this.otpCode ? this.otpCode.trim() : undefined,
+              };
+              res = await axios.post(`${API_BASE}/students/register`, payload);
+            }
+            this.token = res.data.access_token;
+            this.user = res.data.student;
+            this.role = 'STUDENT';
+            localStorage.setItem('token', this.token);
+            localStorage.setItem('role', 'STUDENT');
+            localStorage.setItem('user', JSON.stringify(this.user));
+            this.playSound('success');
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            this.activeTab = 'student_dashboard';
+            this.loadStudentData();
+          } catch (err) {
+            this.authError = err.response?.data?.detail || 'Authentication failed.';
+          } finally {
+            this.authLoading = false;
+          }
+        },
+        async handleRecruiterAuth() {
+          this.authError = '';
+          this.authLoading = true;
+          try {
+            let res;
+            if (this.authMode === 'login') {
+              res = await axios.post(`${API_BASE}/companies/login`, {
+                email: this.recruiterForm.email,
+                password: this.recruiterForm.password,
+              });
+            } else {
+              if (!this.otpVerified) {
+                this.authError = 'Please verify your recruiter work email with the email link first.';
+                this.authLoading = false;
+                return;
+              }
+              const payload = {
+                ...this.recruiterForm,
+                otp: this.otpCode ? this.otpCode.trim() : undefined,
+              };
+              res = await axios.post(`${API_BASE}/companies/register`, payload);
+            }
+            this.token = res.data.access_token;
+            this.user = res.data.company;
+            this.role = 'RECRUITER';
+            localStorage.setItem('token', this.token);
+            localStorage.setItem('role', 'RECRUITER');
+            localStorage.setItem('user', JSON.stringify(this.user));
+            this.playSound('success');
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            this.activeTab = 'recruiter_dashboard';
+            this.loadRecruiterData();
+          } catch (err) {
+            this.authError = err.response?.data?.detail || 'Authentication failed.';
+          } finally {
+            this.authLoading = false;
+          }
+        },
+        logout() {
+          this.playSound('click');
+          this.token = null;
+          this.user = {};
+          this.role = null;
+          localStorage.clear();
+          this.activeTab = 'landing';
+        },
+        async loadStudentData() {
+          try {
+            const [apps, resumeRes, faqs, profileRes] = await Promise.all([
+              axios.get(`${API_BASE}/applications/student/my-applications`, this.getAuthHeader()).catch(() => ({ data: [] })),
+              axios.get(`${API_BASE}/resumes/me`, this.getAuthHeader()).catch(() => ({ data: null })),
+              axios.get(`${API_BASE}/chat/faqs`).catch(() => ({ data: [] })),
+              axios.get(`${API_BASE}/students/profile/me`, this.getAuthHeader()).catch(() => ({ data: null })),
+            ]);
+            this.myApplications = apps.data || [];
+            this.myResume = resumeRes.data;
+            this.chatFaqs = faqs.data || [];
+            if (profileRes.data) {
+              this.user = profileRes.data;
+              localStorage.setItem('user', JSON.stringify(this.user));
+              this.populateProfileForm();
+            }
+            this.fetchPublicDrives();
+          } catch (e) {
+            console.warn('Error loading student data', e);
+          }
+        },
+        async loadRecruiterData() {
+          try {
+            const res = await axios.get(`${API_BASE}/drives/company/my-drives`, this.getAuthHeader());
+            this.myCompanyDrives = res.data || [];
+          } catch (e) {
+            console.warn('Error loading recruiter drives', e);
+          }
+        },
+        async evaluateDrive(drive) {
+          this.playSound('click');
+          this.activeDrive = drive;
+          this.eligibilityModalOpen = true;
+          this.eligibilityChecking = true;
+          this.eligibilityResult = null;
+          try {
+            const res = await axios.get(`${API_BASE}/eligibility/check/${drive.id}`, this.getAuthHeader());
+            this.eligibilityResult = res.data;
+            if (res.data.eligible) {
+              this.playSound('success');
+              confetti({ particleCount: 60, spread: 60, origin: { y: 0.7 } });
+            }
+          } catch (e) {
+            this.eligibilityResult = { error: e.response?.data?.detail || 'Eligibility check failed.' };
+          } finally {
+            this.eligibilityChecking = false;
+          }
+        },
+        async applyDirectly(driveId) {
+          this.playSound('click');
+          try {
+            await axios.post(`${API_BASE}/applications/apply`, { drive_id: driveId }, this.getAuthHeader());
+            this.playSound('success');
+            confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+            alert('Application submitted successfully!');
+            this.loadStudentData();
+          } catch (e) {
+            alert(e.response?.data?.detail || 'Application failed. Please verify your eligibility.');
+          }
+        },
+        async uploadResumeFile(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          this.resumeUploading = true;
+          const formData = new FormData();
+          formData.append('file', file);
+          try {
+            const res = await axios.post(`${API_BASE}/resumes/upload`, formData, {
+              headers: {
+                Authorization: `Bearer ${this.token}`,
+                'Content-Type': 'multipart/form-data'
+              }
+            });
+            this.myResume = res.data;
+            this.playSound('success');
+            confetti({ particleCount: 70, spread: 70 });
+            alert('Resume extracted and skill graph nodes synced to Neo4j!');
+            const profile = await axios.get(`${API_BASE}/students/profile/me`, this.getAuthHeader());
+            this.user = profile.data;
+            localStorage.setItem('user', JSON.stringify(this.user));
+            this.populateProfileForm();
+          } catch (e) {
+            alert(e.response?.data?.detail || 'Failed to upload resume.');
+          } finally {
+            this.resumeUploading = false;
+          }
+        },
+        async sendChatMessage(customText = null) {
+          const q = (customText || this.chatInput).trim();
+          if (!q || this.chatLoading) return;
+          this.playSound('click');
+          this.chatMessages.push({ text: q, sender: 'user' });
+          if (!customText) this.chatInput = '';
+          this.chatLoading = true;
+          try {
+            const payload = { question: q };
+            if (this.chatDriveId) payload.drive_id = this.chatDriveId;
+            const res = await axios.post(`${API_BASE}/chat/ask`, payload, this.getAuthHeader());
+            this.chatMessages.push({
+              text: res.data.answer,
+              sender: 'ai',
+              suggestedSkills: res.data.suggested_skills_to_learn || [],
+            });
+            this.playSound('success');
+          } catch (e) {
+            this.chatMessages.push({
+              text: e.response?.data?.detail || 'Failed to query GraphRAG engine.',
+              sender: 'ai'
+            });
+          } finally {
+            this.chatLoading = false;
+          }
+        },
+        async handleCreateDrive() {
+          this.playSound('click');
+          try {
+            const payload = {
+              title: this.postDriveForm.title,
+              role_type: this.postDriveForm.role_type,
+              salary_package: this.postDriveForm.salary_package,
+              location: this.postDriveForm.location,
+              job_description: this.postDriveForm.job_description,
+              required_skills: this.postDriveForm.requiredSkillsInput.split(',').map(s => s.trim()).filter(Boolean),
+              eligibility_criteria: {
+                min_cgpa: parseFloat(this.postDriveForm.min_cgpa) || 0.0,
+                max_backlogs: parseInt(this.postDriveForm.max_backlogs) || 0,
+                mandatory_skills: this.postDriveForm.mandatorySkillsInput.split(',').map(s => s.trim()).filter(Boolean),
+              }
+            };
+            await axios.post(`${API_BASE}/drives/`, payload, this.getAuthHeader());
+            this.playSound('success');
+            confetti({ particleCount: 100, spread: 80 });
+            alert('Placement drive published and synced to Neo4j graph!');
+            this.activeTab = 'recruiter_dashboard';
+            this.loadRecruiterData();
+          } catch (e) {
+            alert(e.response?.data?.detail || 'Failed to publish drive.');
+          }
+        },
+        async viewApplicants(drive) {
+          this.playSound('click');
+          this.selectedDriveForApplicants = drive;
+          try {
+            const res = await axios.get(`${API_BASE}/applications/drive/${drive.id}/applicants`, this.getAuthHeader());
+            this.currentDriveApplicants = res.data || [];
+            this.activeTab = 'recruiter_applicants';
+          } catch (e) {
+            alert(e.response?.data?.detail || 'Failed to fetch applicants.');
+          }
+        },
+        openStatusModal(app) {
+          this.playSound('click');
+          this.selectedAppToUpdate = app;
+          this.statusUpdateForm.status = app.status;
+          this.statusUpdateForm.remarks = '';
+          this.statusModalOpen = true;
+        },
+        async handleUpdateApplicantStatus() {
+          this.playSound('click');
+          try {
+            await axios.put(`${API_BASE}/applications/${this.selectedAppToUpdate.id}/status`, {
+              status: this.statusUpdateForm.status,
+              remarks: this.statusUpdateForm.remarks,
+            }, this.getAuthHeader());
+            this.playSound('success');
+            alert('Applicant status updated in Neo4j audit trail!');
+            this.statusModalOpen = false;
+            this.viewApplicants(this.selectedDriveForApplicants);
+          } catch (e) {
+            alert(e.response?.data?.detail || 'Failed to update status.');
+          }
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
